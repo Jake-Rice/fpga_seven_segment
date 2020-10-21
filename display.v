@@ -5,25 +5,23 @@ module display(
     input [7:0] anodes,
     output reg shift = 0,
     output reg latch = 0,
-    output reg data = 0,
-    output reg blank = 1
+    output reg data = 0
     );
     
-    reg [5:0] step_count = 0;    
-    reg new_digit = 0;
-    
-    always @(anodes) new_digit <= 1;
+    reg [4:0] step_count = 0;
+    reg [7:0] old_anodes = 8'b11111111;
     
     always @(posedge sysclk) begin
-        if (new_digit) begin
+        if (anodes!=old_anodes) begin
             if (step_count == 16) begin
-                new_digit <= 0;
                 shift <= 0;
                 latch <= 1;
-                blank <= 0;
+            end
+            else if (step_count == 17) begin
+                old_anodes <= anodes;
+                latch <= 0;
             end
             else begin
-                blank <= 1;
                 latch <= 0;
                 case (step_count)
                     0: begin
@@ -63,6 +61,8 @@ module display(
             end
             step_count <= step_count + 1;
         end
-        else step_count <= 0; 
-    end    
+        else begin 
+            step_count <= 0;
+        end
+    end
 endmodule

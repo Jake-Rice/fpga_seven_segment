@@ -11,7 +11,7 @@ module cathode_driver(
             2'b01: cath <= 4'b0010;
             2'b10: cath <= 4'b0100;
             2'b11: cath <= 4'b1000;
-            default: cath <=4'b0000;
+            default: cath <= 4'b0000;
         endcase
     end
 endmodule

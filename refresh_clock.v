@@ -2,22 +2,28 @@
 
 module refresh_clock(
     input sysclk,
-    output reg [1:0] ref_clk = 0
+    output reg [1:0] ref_clk = 0,
+    output reg blank = 1
     );
     
-    parameter clk_divide = 12000; // refresh rate of 1,000 Hz
+    parameter clk_divide = 12000; // refresh rate of 250 Hz
     
-    reg [13:0] clk_counter = 0;
-    reg reset = 0;
+    parameter duty_cycle = 20; // percent of maximum led brightness
+    
+    reg [13:0] blank_release = 17 + (clk_divide-(duty_cycle*clk_divide/100)); //17 clock cycles needed to load anode values into shift register
+    
+    reg [14:0] clk_counter = 0;
     
     always @(posedge sysclk) begin
-        if (clk_counter == 0) reset <= 0;
-        else if (reset) clk_counter <= 0;
-        else if (clk_counter == clk_divide) begin
+        if (clk_counter == clk_divide) begin
             ref_clk <= ref_clk + 1;
-            reset <= 1;
+            clk_counter <= 0;
+            blank <= 1;
         end
-        clk_counter <= clk_counter + 1;
+        else clk_counter <= clk_counter + 1;
+        
+        
+        if (clk_counter == blank_release) blank <= 0;
     end
     
 endmodule
